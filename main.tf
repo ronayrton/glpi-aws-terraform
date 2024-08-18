@@ -1,25 +1,33 @@
+# Especifica o provedor AWS
 provider "aws" {
-  region = var.aws_region "us-east-1"
+  region = "us-west-2"  # Substitua pela sua região desejada
 }
 
-module "vpc" {
-  source = "./modules/vpc"
+# Cria a VPC
+resource "aws_vpc" "main_vpc" {
+  cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "main-vpc"
+  }
 }
 
-module "ec2" {
-  source = "./modules/ec2"
-  vpc_id = module.vpc.vpc_id
-  public_subnet_id = module.vpc.public_subnet_id
+# Cria uma sub-rede pública
+resource "aws_subnet" "public_subnet" {
+  vpc_id     = aws_vpc.main_vpc.id
+  cidr_block = "10.0.1.0/24"
+
+  tags = {
+    Name = "public-subnet"
+  }
 }
 
-module "rds" {
-  source = "./modules/rds"
-  vpc_id = module.vpc.vpc_id
-  private_subnet_ids = module.vpc.private_subnet_ids
+# Cria uma sub-rede privada
+resource "aws_subnet" "private_subnet" {
+  vpc_id     = aws_vpc.main_vpc.id
+  cidr_block = "10.0.2.0/24"
+
+  tags = {
+    Name = "private-subnet"
+  }
 }
-
-module "s3" {
-  source = "./modules/s3"
-}
-
-
